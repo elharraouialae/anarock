@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANAROCK — Enter The Drop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syncopate:wght@400;700&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,200;0,300;0,400;1,200&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --charcoal: #0e0e0e;
+    --card: #111214;
+    --border: rgba(255,255,255,0.07);
+    --blue: #0af;
+    --blue-glow: rgba(0,170,255,0.35);
+    --chrome: #c8d8e8;
+    --chrome-dim: rgba(200,216,232,0.5);
+    --white: #f0f4f8;
+    --muted: rgba(240,244,248,0.4);
+    --glass: rgba(255,255,255,0.04);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; overflow-x: hidden; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* ─── CUSTOM CURSOR ─── */
+  #cursor {
+    position: fixed; z-index: 9999;
+    width: 12px; height: 12px;
+    background: var(--blue);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+    mix-blend-mode: screen;
+  }
+  #cursor-ring {
+    position: fixed; z-index: 9998;
+    width: 40px; height: 40px;
+    border: 1px solid rgba(0,170,255,0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    transition: transform 0.15s ease-out, width 0.3s, height 0.3s, opacity 0.3s;
+  }
+  body:hover #cursor { opacity: 1; }
+  .hover-target:hover ~ #cursor,
+  a:hover ~ #cursor { width: 20px; height: 20px; }
+
+  /* ─── LOADER ─── */
+  #loader {
+    position: fixed; inset: 0; z-index: 10000;
+    background: var(--black);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 32px;
+  }
+  #loader .logo-load {
+    font-family: 'Syncopate', sans-serif;
+    font-size: clamp(36px, 8vw, 80px);
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--chrome);
+    animation: logoReveal 2s ease forwards;
+  }
+  @keyframes logoReveal {
+    0% { -webkit-text-stroke-color: transparent; letter-spacing: 0.6em; opacity: 0; }
+    50% { -webkit-text-stroke-color: var(--blue); }
+    100% { -webkit-text-stroke-color: var(--chrome); letter-spacing: 0.3em; opacity: 1; }
+  }
+  .load-bar {
+    width: 200px; height: 1px;
+    background: rgba(255,255,255,0.1);
+    position: relative; overflow: hidden;
+  }
+  .load-bar::after {
+    content: '';
+    position: absolute; left: -100%; top: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, var(--blue), var(--chrome));
+    animation: loadBar 1.8s ease-in-out forwards;
+  }
+  @keyframes loadBar { 0%{left:-100%} 100%{left:100%} }
+  .load-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    animation: blink 1s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  #loader.fade-out {
+    animation: loaderFade 0.8s ease forwards;
+  }
+  @keyframes loaderFade { to { opacity:0; pointer-events:none; } }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    padding: 24px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(180deg, rgba(8,8,8,0.95) 0%, transparent 100%);
+    backdrop-filter: blur(0px);
+    transition: backdrop-filter 0.3s, background 0.3s;
+  }
+  nav.scrolled {
+    background: rgba(8,8,8,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--white);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-logo:hover { color: var(--blue); }
+  .nav-links {
+    display: flex; gap: 48px; list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--blue);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-cart {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--white);
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 10px 24px;
+    cursor: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .nav-cart::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--blue);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+  .nav-cart:hover { border-color: var(--blue); color: var(--black); }
+  .nav-cart:hover::before { transform: scaleX(1); }
+
+  /* ─── HERO ─── */
+  #hero {
+    position: relative;
+    height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,120,200,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 80% 80%, rgba(0,170,255,0.06) 0%, transparent 50%),
+      var(--black);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 100% 100% at 50% 50%, black 20%, transparent 80%);
+    animation: gridDrift 20s linear infinite;
+  }
+  @keyframes gridDrift { 0%{transform:translateY(0)} 100%{transform:translateY(80px)} }
+
+  .hero-noise {
+    position: absolute; inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px;
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    opacity: 0;
+    animation: heroIn 1.2s ease 2.2s forwards;
+  }
+  @keyframes heroIn {
+    0% { opacity:0; transform:translateY(30px); }
+    100% { opacity:1; transform:translateY(0); }
+  }
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 16px; justify-content: center;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: '';
+    width: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue));
+  }
+  .hero-eyebrow::after { transform: scaleX(-1); }
+
+  .hero-title {
+    font-family: 'Syncopate', sans-serif;
+    font-size: clamp(64px, 14vw, 180px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, var(--white) 0%, var(--chrome-dim) 40%, var(--white) 60%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .hero-title::after {
+    content: 'ANAROCK';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 30%, var(--blue) 50%, transparent 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200%;
+    animation: shimmer 4s linear infinite;
+    opacity: 0.4;
+  }
+  @keyframes shimmer { 0%{background-position:-100%} 100%{background-position:300%} }
+
+  .hero-tagline {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 200;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin: 28px auto 48px;
+    font-style: italic;
+  }
+
+  .hero-cta {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--white);
+    padding: 18px 52px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+  .hero-cta::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--blue) 0%, #60c8ff 100%);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.5s cubic-bezier(0.77,0,0.175,1);
+  }
+  .hero-cta span { position: relative; z-index: 1; transition: color 0.3s; }
+  .hero-cta:hover::before { transform: scaleX(1); transform-origin: left; }
+  .hero-cta:hover span { color: var(--white); }
+  .hero-cta:hover { transform: translateY(-2px); }
+
+  .hero-scroll {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: heroIn 1s ease 3s forwards; opacity: 0;
+  }
+  .scroll-line {
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--blue), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.1)} }
+  .scroll-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.3em; color: var(--muted);
+    writing-mode: vertical-rl;
+  }
+
+  /* ─── SECTIONS COMMON ─── */
+  section { padding: 120px 60px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::before {
+    content: '//';
+    opacity: 0.5;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+  .section-sub {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 480px;
+    font-weight: 200;
+  }
+
+  /* ─── DROP SECTION ─── */
+  #drop {
+    background: var(--charcoal);
+    position: relative; overflow: hidden;
+  }
+  #drop::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  }
+  .drop-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 64px;
+  }
+  .countdown-wrap {
+    text-align: right;
+  }
+  .countdown-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.3em; color: var(--blue);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .countdown {
+    display: flex; gap: 12px; align-items: center;
+  }
+  .cd-unit {
+    text-align: center;
+  }
+  .cd-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    color: var(--white);
+    line-height: 1;
+    display: block;
+  }
+  .cd-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; color: var(--muted); letter-spacing: 0.2em;
+  }
+  .cd-sep {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; color: var(--blue);
+    margin-bottom: 14px;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .product-card {
+    position: relative;
+    background: var(--card);
+    overflow: hidden;
+    cursor: none;
+    border: 1px solid var(--border);
+    transition: border-color 0.4s;
+  }
+  .product-card:hover { border-color: rgba(0,170,255,0.3); }
+
+  .product-img {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: #151618;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .product-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .product-placeholder svg {
+    width: 40%; opacity: 0.08;
+    transition: opacity 0.4s, transform 0.6s;
+  }
+  .product-card:hover .product-placeholder svg {
+    opacity: 0.15; transform: scale(1.1);
+  }
+  .product-placeholder::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 120%, rgba(0,170,255,0.08) 0%, transparent 60%);
+    transition: opacity 0.4s;
+  }
+  .product-card:hover .product-placeholder::after { opacity: 2; }
+
+  .product-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+    padding: 24px 20px 0;
+    transform: translateY(60px);
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .product-card:hover .product-overlay { transform: translateY(0); }
+
+  .quick-view {
+    display: block; width: 100%;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--blue);
+    border: none;
+    padding: 12px;
+    cursor: none;
+    margin-bottom: 20px;
+    transition: background 0.3s;
+  }
+  .quick-view:hover { background: var(--white); }
+
+  .product-info { padding: 20px; }
+  .product-name {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.1em; color: var(--white);
+    margin-bottom: 6px;
+  }
+  .product-meta {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .product-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 14px; color: var(--chrome);
+  }
+  .stock-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 8px; letter-spacing: 0.15em;
+    color: var(--blue);
+    border: 1px solid rgba(0,170,255,0.3);
+    padding: 3px 8px;
+    animation: stockBlink 3s ease infinite;
+  }
+  @keyframes stockBlink { 0%,100%{border-color:rgba(0,170,255,0.3)} 50%{border-color:rgba(0,170,255,0.8)} }
+
+  /* ─── PHILOSOPHY ─── */
+  #philosophy {
+    position: relative; overflow: hidden;
+    background: var(--black);
+  }
+  .phil-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .phil-left { position: relative; }
+  .phil-accent {
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,170,255,0.1), transparent 70%);
+    pointer-events: none;
+  }
+  .big-quote {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 12vw, 160px);
+    line-height: 0.85;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+    position: absolute; top: -20px; left: -20px;
+    pointer-events: none; user-select: none;
+  }
+  .phil-text-block {
+    position: relative; z-index: 1;
+  }
+  .phil-body {
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(240,244,248,0.6);
+    font-weight: 200;
+    margin-bottom: 24px;
+  }
+  .phil-body strong {
+    color: var(--white);
+    font-weight: 400;
+  }
+  .phil-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .phil-block {
+    aspect-ratio: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    text-align: center;
+    transition: background 0.3s, border-color 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .phil-block::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,170,255,0.06), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .phil-block:hover { border-color: rgba(0,170,255,0.3); }
+  .phil-block:hover::before { opacity: 1; }
+  .phil-block-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; color: var(--blue); line-height: 1;
+  }
+  .phil-block-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em; color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ─── SOCIAL ─── */
+  #social {
+    background: var(--charcoal);
+    position: relative;
+  }
+  #social::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,170,255,0.5), transparent);
+  }
+  .social-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 48px;
+  }
+  .ig-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    color: var(--blue); text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
+    transition: gap 0.3s;
+  }
+  .ig-link:hover { gap: 14px; }
+
+  .social-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2px;
+  }
+  .social-item {
+    aspect-ratio: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    cursor: none;
+  }
+  .social-item::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(0,170,255,0.2);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .social-item:hover::after { opacity: 1; }
+  .social-item svg { width: 30%; opacity: 0.07; }
+
+  /* ─── SHOP ─── */
+  #shop {
+    background: var(--black);
+  }
+  .shop-filters {
+    display: flex; gap: 2px; margin-bottom: 48px;
+    border: 1px solid var(--border);
+    display: inline-flex;
+  }
+  .filter-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none; color: var(--muted);
+    padding: 12px 24px;
+    cursor: none;
+    transition: background 0.3s, color 0.3s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--blue); color: var(--black);
+  }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+
+  /* ─── NEWSLETTER ─── */
+  .newsletter-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .newsletter-overlay.show {
+    opacity: 1; pointer-events: all;
+  }
+  .newsletter-box {
+    background: var(--card);
+    border: 1px solid rgba(0,170,255,0.2);
+    padding: 64px;
+    max-width: 520px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,170,255,0.1);
+    transform: translateY(20px);
+    transition: transform 0.5s;
+  }
+  .newsletter-overlay.show .newsletter-box { transform: translateY(0); }
+  .nl-close {
+    position: absolute; top: 20px; right: 24px;
+    background: transparent; border: none;
+    color: var(--muted); font-size: 24px;
+    cursor: none; transition: color 0.3s;
+    font-family: 'Space Mono', monospace;
+  }
+  .nl-close:hover { color: var(--white); }
+  .nl-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.4em; color: var(--blue);
+    margin-bottom: 16px;
+  }
+  .nl-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; line-height: 0.95;
+    margin-bottom: 16px; color: var(--white);
+  }
+  .nl-sub {
+    font-size: 14px; color: var(--muted);
+    font-weight: 200; line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .nl-form {
+    display: flex; gap: 0;
+    border: 1px solid var(--border);
+  }
+  .nl-input {
+    flex: 1;
+    background: transparent;
+    border: none; outline: none;
+    padding: 16px 20px;
+    color: var(--white);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+  }
+  .nl-input::placeholder { color: var(--muted); }
+  .nl-submit {
+    background: var(--blue);
+    border: none;
+    color: var(--black);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    padding: 0 24px;
+    cursor: none;
+    text-transform: uppercase;
+    transition: background 0.3s;
+  }
+  .nl-submit:hover { background: var(--white); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 80px 60px 40px;
+    border-top: 1px solid var(--border);
+    background: var(--charcoal);
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px; margin-bottom: 60px;
+  }
+  .footer-brand-name {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 28px; font-weight: 700;
+    letter-spacing: 0.2em; color: var(--white);
+    margin-bottom: 16px;
+  }
+  .footer-brand-desc {
+    font-size: 13px; color: var(--muted);
+    font-weight: 200; line-height: 1.7;
+    max-width: 280px;
+  }
+  .footer-col-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.3em; color: var(--blue);
+    text-transform: uppercase; margin-bottom: 20px;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .footer-links a {
+    font-size: 13px; color: var(--muted); text-decoration: none;
+    font-weight: 200; transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-bottom {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 32px; border-top: 1px solid var(--border);
+  }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--muted); letter-spacing: 0.1em;
+  }
+  .footer-socials { display: flex; gap: 24px; }
+  .footer-socials a {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; color: var(--muted); letter-spacing: 0.1em;
+    text-decoration: none; transition: color 0.3s;
+  }
+  .footer-socials a:hover { color: var(--blue); }
+
+  /* ─── SCROLL REVEAL ─── */
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+
+  /* ─── PRODUCT MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 6000;
+    background: rgba(0,0,0,0.9);
+    backdrop-filter: blur(16px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--card);
+    border: 1px solid rgba(0,170,255,0.15);
+    max-width: 900px; width: 95%;
+    max-height: 90vh; overflow-y: auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    transform: scale(0.95);
+    transition: transform 0.4s;
+    box-shadow: 0 0 100px rgba(0,170,255,0.08);
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-img {
+    background: #151618;
+    aspect-ratio: auto; min-height: 400px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .modal-img svg { width: 40%; opacity: 0.08; }
+  .modal-body { padding: 48px 40px; }
+  .modal-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.3em; color: var(--blue);
+    margin-bottom: 12px;
+  }
+  .modal-name {
+    font-family: 'Syncopate', sans-serif;
+    font-size: 22px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--white); margin-bottom: 8px;
+  }
+  .modal-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; color: var(--chrome);
+    margin-bottom: 24px;
+  }
+  .modal-desc {
+    font-size: 13px; line-height: 1.7; color: var(--muted);
+    font-weight: 200; margin-bottom: 32px;
+  }
+  .size-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em; color: var(--muted);
+    margin-bottom: 12px; text-transform: uppercase;
+  }
+  .size-grid { display: flex; gap: 8px; margin-bottom: 32px; flex-wrap: wrap; }
+  .size-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; padding: 8px 16px;
+    cursor: none; transition: all 0.3s;
+  }
+  .size-btn:hover, .size-btn.selected {
+    border-color: var(--blue); color: var(--white);
+    background: rgba(0,170,255,0.1);
+  }
+  .add-to-cart {
+    display: block; width: 100%;
+    background: var(--white);
+    border: none; color: var(--black);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 18px;
+    cursor: none; transition: all 0.3s;
+    position: relative; overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .add-to-cart::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--blue);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.77,0,0.175,1);
+  }
+  .add-to-cart span { position: relative; z-index: 1; transition: color 0.3s; }
+  .add-to-cart:hover::before { transform: scaleX(1); }
+  .add-to-cart:hover span { color: var(--white); }
+  .modal-close {
+    position: absolute; top: 0; right: 0;
+    width: 48px; height: 48px;
+    background: rgba(0,0,0,0.5);
+    border: none; color: var(--muted);
+    font-size: 20px; cursor: none;
+    transition: color 0.3s, background 0.3s;
+    z-index: 10;
+  }
+  .modal-close:hover { color: var(--white); background: rgba(0,170,255,0.2); }
+  .shipping-info {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px; letter-spacing: 0.15em; color: var(--muted);
+    padding: 16px 0; border-top: 1px solid var(--border);
+    display: flex; gap: 20px;
+  }
+
+  /* ─── GLOW LINE ─── */
+  .glow-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--blue) 30%, rgba(0,170,255,0.3) 70%, transparent 100%);
+    margin: 0;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    section { padding: 80px 24px; }
+    .product-grid { grid-template-columns: 1fr 1fr; }
+    .social-grid { grid-template-columns: repeat(3, 1fr); }
+    .shop-grid { grid-template-columns: 1fr 1fr; }
+    .phil-layout { grid-template-columns: 1fr; }
+    .drop-header { flex-direction: column; gap: 32px; align-items: flex-start; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    .modal { grid-template-columns: 1fr; }
+    .modal-img { min-height: 250px; }
+  }
+  @media (max-width: 600px) {
+    .product-grid { grid-template-columns: 1fr; }
+    .social-grid { grid-template-columns: repeat(2, 1fr); }
+    .shop-grid { grid-template-columns: 1fr; }
+    footer { padding: 60px 24px 32px; }
+    .footer-top { grid-template-columns: 1fr; }
+    .newsletter-box { padding: 40px 24px; }
+  }
+
+  /* ─── CART TOAST ─── */
+  .toast {
+    position: fixed; bottom: 40px; right: 40px; z-index: 9000;
+    background: var(--card);
+    border: 1px solid rgba(0,170,255,0.3);
+    border-left: 3px solid var(--blue);
+    padding: 16px 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; color: var(--white);
+    box-shadow: 0 0 40px rgba(0,170,255,0.1);
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .toast.show { transform: translateX(0); }
+  .toast-sub { font-size: 9px; color: var(--blue); margin-top: 4px; letter-spacing: 0.15em; }
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="logo-load">ANAROCK</div>
+  <div class="load-bar"></div>
+  <div class="load-text">INITIALIZING DROP_001</div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">ANAROCK</a>
+  <ul class="nav-links">
+    <li><a href="#drop">New Drop</a></li>
+    <li><a href="#shop">Shop</a></li>
+    <li><a href="#philosophy">Manifesto</a></li>
+    <li><a href="#social">Community</a></li>
+  </ul>
+  <button class="nav-cart" onclick="showToast()">CART (0)</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">NEW DROP 001 — 2026</div>
+    <h1 class="hero-title">ANAROCK</h1>
+    <p class="hero-tagline">Not a brand. A declaration.</p>
+    <a href="#drop" class="hero-cta"><span>ENTER THE DROP</span></a>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">SCROLL</span>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- DROP SECTION -->
+<section id="drop">
+  <div class="drop-header reveal">
+    <div>
+      <div class="section-label">Drop 001 — Limited</div>
+      <h2 class="section-title">THE VOID<br>COLLECTION</h2>
+      <p class="section-sub">Crafted for those who move in the dark. Each piece engineered for the ones who refuse to be defined.</p>
+    </div>
+    <div class="countdown-wrap">
+      <div class="countdown-label">// DROP CLOSES IN</div>
+      <div class="countdown">
+        <div class="cd-unit"><span class="cd-num" id="cd-h">18</span><span class="cd-label">HRS</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit"><span class="cd-num" id="cd-m">42</span><span class="cd-label">MIN</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit"><span class="cd-num" id="cd-s">09</span><span class="cd-label">SEC</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="product-grid">
+    <!-- Product 1 -->
+    <div class="product-card reveal reveal-delay-1" onclick="openModal('VOID JACKET I','$480','Oversized technical shell jacket. Water-resistant matte black. Concealed pockets. Limited to 50 units worldwide.')">
+      <div class="product-img">
+        <div class="product-placeholder">
+          <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="20" width="80" height="90" rx="4" stroke="white" stroke-width="2"/>
+            <path d="M10 20 L0 40 L10 40" stroke="white" stroke-width="2"/>
+            <path d="M90 20 L100 40 L90 40" stroke="white" stroke-width="2"/>
+            <line x1="10" y1="50" x2="90" y2="50" stroke="white" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="product-overlay">
+          <button class="quick-view">QUICK VIEW</button>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">VOID JACKET I</div>
+        <div class="product-meta">
+          <span class="product-price">$480</span>
+          <span class="stock-badge">7 LEFT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="product-card reveal reveal-delay-2" onclick="openModal('CHROME HOODIE','$220','Ultra-heavy 500gsm french terry. Dropped shoulders. Reflective ANAROCK wordmark across chest. Drop-needle construction.')">
+      <div class="product-img">
+        <div class="product-placeholder">
+          <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 30 Q50 10 80 30 L90 50 L70 50 L70 110 L30 110 L30 50 L10 50 Z" stroke="white" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="product-overlay">
+          <button class="quick-view">QUICK VIEW</button>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">CHROME HOODIE</div>
+        <div class="product-meta">
+          <span class="product-price">$220</span>
+          <span class="stock-badge">12 LEFT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="product-card reveal reveal-delay-3" onclick="openModal('SHADOW TEE','$95','Japanese 260gsm cotton. Garment-dyed phantom black. Subtle embossed logo rear collar. Slightly cropped.')">
+      <div class="product-img">
+        <div class="product-placeholder">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30 15 Q50 5 70 15 L85 35 L70 40 L70 90 L30 90 L30 40 L15 35 Z" stroke="white" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="product-overlay">
+          <button class="quick-view">QUICK VIEW</button>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="product-name">SHADOW TEE</div>
+        <div class="product-meta">
+          <span class="product-price">$95</span>
+          <span class="stock-badge">LAST 3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="phil-layout">
+    <div class="phil-left reveal">
+      <div class="phil-accent"></div>
+      <div class="big-quote">"</div>
+      <div class="phil-text-block">
+        <div class="section-label">The Manifesto</div>
+        <h2 class="section-title">DRESSED<br>IN DEFIANCE</h2>
+        <p class="phil-body">
+          ANAROCK was built in the spaces between <strong>luxury and underground</strong>. Where precision meets rebellion. Where a garment isn't just worn — it's <strong>wielded</strong>.
+        </p>
+        <p class="phil-body">
+          We don't make clothes for everyone. We make them for <strong>the few who understand</strong> that what you put on your body is a signal — to the world, and to yourself.
+        </p>
+        <p class="phil-body">
+          <strong>No compromises. No seasons. Only drops.</strong>
+        </p>
+      </div>
+    </div>
+    <div class="phil-right reveal">
+      <div class="phil-block reveal-delay-1">
+        <div class="phil-block-num">001</div>
+        <div class="phil-block-label">Drops Per Year</div>
+      </div>
+      <div class="phil-block reveal-delay-2">
+        <div class="phil-block-num">50</div>
+        <div class="phil-block-label">Units Max Per Piece</div>
+      </div>
+      <div class="phil-block reveal-delay-3">
+        <div class="phil-block-num">JP</div>
+        <div class="phil-block-label">Fabric Origin</div>
+      </div>
+      <div class="phil-block reveal-delay-4">
+        <div class="phil-block-num">∞</div>
+        <div class="phil-block-label">Lifetime Warranty</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- SOCIAL -->
+<section id="social">
+  <div class="social-header reveal">
+    <div>
+      <div class="section-label">Community</div>
+      <h2 class="section-title">WORN IN<br>THE WILD</h2>
+    </div>
+    <a href="#" class="ig-link">@ANAROCK_ →</a>
+  </div>
+  <div class="social-grid reveal">
+    <div class="social-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.5"/></svg></div>
+    <div class="social-item"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" stroke-width="1.5"/></svg></div>
+    <div class="social-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.5"/></svg></div>
+    <div class="social-item"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" stroke-width="1.5"/></svg></div>
+    <div class="social-item"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" stroke-width="1.5"/></svg></div>
+    <div class="social-item"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" stroke-width="1.5"/></svg></div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- SHOP -->
+<section id="shop">
+  <div class="section-label reveal">Full Catalog</div>
+  <h2 class="section-title reveal">SHOP<br>ALL</h2>
+
+  <div class="shop-filters reveal">
+    <button class="filter-btn active" onclick="setFilter(this,'all')">ALL</button>
+    <button class="filter-btn" onclick="setFilter(this,'tops')">TOPS</button>
+    <button class="filter-btn" onclick="setFilter(this,'outerwear')">OUTERWEAR</button>
+    <button class="filter-btn" onclick="setFilter(this,'bottoms')">BOTTOMS</button>
+    <button class="filter-btn" onclick="setFilter(this,'accessories')">ACCESSORIES</button>
+  </div>
+
+  <div class="shop-grid" id="shopGrid">
+    <div class="product-card reveal reveal-delay-1" data-cat="outerwear" onclick="openModal('VOID JACKET I','$480','Technical shell jacket. Matte black. Limited 50 units.')">
+      <div class="product-img"><div class="product-placeholder"><svg viewBox="0 0 100 120" fill="none"><rect x="10" y="20" width="80" height="90" rx="4" stroke="white" stroke-width="2"/><path d="M10 20 L0 40 L10 40" stroke="white" stroke-width="2"/><path d="M90 20 L100 40 L90 40" stroke="white" stroke-width="2"/></svg></div><div class="product-overlay"><button class="quick-view">QUICK VIEW</button></div></div>
+      <div class="product-info"><div class="product-name">VOID JACKET I</div><div class="product-meta"><span class="product-price">$480</span><span class="stock-badge">7 LEFT</span></div></div>
+    </div>
+    <div class="product-card reveal reveal-delay-2" data-cat="tops" onclick="openModal('CHROME HOODIE','$220','500gsm french terry. Dropped shoulders.')">
+      <div class="product-img"><div class="product-placeholder"><svg viewBox="0 0 100 120" fill="none"><path d="M20 30 Q50 10 80 30 L90 50 L70 50 L70 110 L30 110 L30 50 L10 50 Z" stroke="white" stroke-width="2"/></svg></div><div class="product-overlay"><button class="quick-view">QUICK VIEW</button></div></div>
+      <div class="product-info"><div class="product-name">CHROME HOODIE</div><div class="product-meta"><span class="product-price">$220</span><span class="stock-badge">12 LEFT</span></div></div>
+    </div>
+    <div class="product-card reveal reveal-delay-3" data-cat="tops" onclick="openModal('SHADOW TEE','$95','Japanese 260gsm cotton. Garment-dyed phantom black.')">
+      <div class="product-img"><div class="product-placeholder"><svg viewBox="0 0 100 100" fill="none"><path d="M30 15 Q50 5 70 15 L85 35 L70 40 L70 90 L30 90 L30 40 L15 35 Z" stroke="white" stroke-width="2"/></svg></div><div class="product-overlay"><button class="quick-view">QUICK VIEW</button></div></div>
+      <div class="product-info"><div class="product-name">SHADOW TEE</div><div class="product-meta"><span class="product-price">$95</span><span class="stock-badge">LAST 3</span></div></div>
+    </div>
+    <div class="product-card reveal reveal-delay-4" data-cat="bottoms" onclick="openModal('OBSIDIAN CARGO','$340','6-pocket technical cargo. Articulated knees. Matte ripstop fabric.')">
+      <div class="product-img"><div class="product-placeholder"><svg viewBox="0 0 100 120" fill="none"><rect x="20" y="10" width="60" height="20" rx="2" stroke="white" stroke-width="2"/><path d="M20 30 L15 110 L45 110 L50 60 L55 110 L85 110 L80 30 Z" stroke="white" stroke-width="2"/></svg></div><div class="product-overlay"><button class="quick-view">QUICK VIEW</button></div></div>
+      <div class="product-info"><div class="product-name">OBSIDIAN CARGO</div><div class="product-meta"><span class="product-price">$340</span><span class="stock-badge">IN STOCK</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">ANAROCK</div>
+      <p class="footer-brand-desc">Not a brand. A declaration. Built for those who move differently and refuse to be defined by anyone else's language.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigate</div>
+      <ul class="footer-links">
+        <li><a href="#drop">New Drop</a></li>
+        <li><a href="#shop">Shop All</a></li>
+        <li><a href="#philosophy">Manifesto</a></li>
+        <li><a href="#social">Community</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Support</div>
+      <ul class="footer-links">
+        <li><a href="#">Sizing Guide</a></li>
+        <li><a href="#">Shipping Info</a></li>
+        <li><a href="#">Returns</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 ANAROCK. ALL RIGHTS RESERVED.</span>
+    <div class="footer-socials">
+      <a href="#">INSTAGRAM</a>
+      <a href="#">TIKTOK</a>
+      <a href="#">TWITTER/X</a>
+    </div>
+  </div>
+</footer>
+
+<!-- NEWSLETTER POPUP -->
+<div class="newsletter-overlay" id="newsletter">
+  <div class="newsletter-box">
+    <button class="nl-close" onclick="closeNewsletter()">×</button>
+    <div class="nl-label">// ACCESS GRANTED</div>
+    <h3 class="nl-title">JOIN THE<br>INNER CIRCLE</h3>
+    <p class="nl-sub">Get early access to drops. Members-only pricing. Zero noise.</p>
+    <div class="nl-form">
+      <input class="nl-input" type="email" placeholder="your@email.com">
+      <button class="nl-submit" onclick="subscribeNewsletter()">ENTER</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal" id="modalInner">
+    <div class="modal-img" style="position:relative">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <svg viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="20" width="80" height="90" rx="4" stroke="white" stroke-width="2"/>
+        <line x1="10" y1="50" x2="90" y2="50" stroke="white" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="modal-body">
+      <div class="modal-tag">// ANAROCK DROP 001</div>
+      <div class="modal-name" id="modal-name">VOID JACKET I</div>
+      <div class="modal-price" id="modal-price">$480</div>
+      <p class="modal-desc" id="modal-desc">Technical shell jacket. Matte black. Limited 50 units.</p>
+      <div class="size-label">SELECT SIZE</div>
+      <div class="size-grid">
+        <button class="size-btn" onclick="selectSize(this)">XS</button>
+        <button class="size-btn" onclick="selectSize(this)">S</button>
+        <button class="size-btn" onclick="selectSize(this)">M</button>
+        <button class="size-btn" onclick="selectSize(this)">L</button>
+        <button class="size-btn" onclick="selectSize(this)">XL</button>
+      </div>
+      <button class="add-to-cart" onclick="addToCart()"><span>ADD TO CART</span></button>
+      <div class="shipping-info">
+        <span>🌍 WORLDWIDE SHIPPING</span>
+        <span>⚡ 2-5 DAYS</span>
+        <span>↩ FREE RETURNS</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div>ADDED TO CART ✓</div>
+  <div class="toast-sub">CHECKOUT TO SECURE YOUR PIECE</div>
+</div>
+
+<script>
+  // ─── CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    cursor.style.left = mouseX + 'px';
+    cursor.style.top = mouseY + 'px';
+  });
+  function animRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+  document.querySelectorAll('a, button, .product-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.width = '20px'; cursor.style.height = '20px';
+      ring.style.width = '60px'; ring.style.height = '60px';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.width = '12px'; cursor.style.height = '12px';
+      ring.style.width = '40px'; ring.style.height = '40px';
+    });
+  });
+
+  // ─── LOADER
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const loader = document.getElementById('loader');
+      loader.classList.add('fade-out');
+      setTimeout(() => { loader.style.display = 'none'; }, 800);
+    }, 2200);
+  });
+
+  // ─── NAV SCROLL
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // ─── COUNTDOWN
+  const dropTime = new Date(Date.now() + 18 * 3600000 + 42 * 60000 + 9000);
+  function updateCountdown() {
+    const diff = dropTime - Date.now();
+    if (diff <= 0) return;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ─── SCROLL REVEAL
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // ─── NEWSLETTER (show after delay)
+  setTimeout(() => {
+    if (!sessionStorage.getItem('nl_seen')) {
+      document.getElementById('newsletter').classList.add('show');
+      sessionStorage.setItem('nl_seen', '1');
+    }
+  }, 5000);
+  function closeNewsletter() {
+    document.getElementById('newsletter').classList.remove('show');
+  }
+  function subscribeNewsletter() {
+    closeNewsletter();
+    showToast('SUBSCRIBED! DROP ACCESS GRANTED.');
+  }
+
+  // ─── MODAL
+  function openModal(name, price, desc) {
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal-price').textContent = price;
+    document.getElementById('modal-desc').textContent = desc;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('productModal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('productModal').classList.remove('open');
+  }
+  document.getElementById('productModal').addEventListener('click', function(e) {
+    if(e.target === this) closeModal();
+  });
+  function selectSize(btn) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  // ─── CART / TOAST
+  let cartCount = 0;
+  function addToCart() {
+    cartCount++;
+    document.querySelector('.nav-cart').textContent = `CART (${cartCount})`;
+    closeModal();
+    showToast();
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    if(msg) t.querySelector('div').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ─── SHOP FILTER
+  function setFilter(btn, cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#shopGrid .product-card').forEach(card => {
+      const c = card.dataset.cat;
+      card.style.display = (cat === 'all' || c === cat) ? '' : 'none';
+    });
+  }
+
+  // ─── PARALLAX HERO GRID
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    const grid = document.querySelector('.hero-grid');
+    if(grid) grid.style.transform = `translateY(${y * 0.3}px)`;
+  });
+</script>
+</body>
+</html>
